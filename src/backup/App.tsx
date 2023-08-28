@@ -1,18 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
-// import { FreeCamera, Vector3, HemisphericLight, StandardMaterial, PointLight, MeshBuilder, Scene, Engine, Color3, SceneLoader, HDRCubeTexture, PBRMaterial, Texture } from "babylonjs";
-
-// npm supports babylonjs
-// https://www.npmjs.com/package/babylonjs
-import * as BABYLON from '@babylonjs/core';
-import "@babylonjs/loaders/glTF";
-
-import SceneComponent from "./SceneComponent"; // uses above component in same directory
 import './App.css';
 
 import logo from './logo.svg';
 
-import { Note } from './note.class';
+import { Note } from '../note.class';
 import $, { removeData } from "jquery";
 
 /* 
@@ -27,7 +19,7 @@ To run in browser...
 
 
 // https://www.typescriptlang.org/docs/handbook/2/modules.html#additional-import-syntax
-import {controlOptions} from './links';
+import {controlOptions} from '../links';
 
 
 /** ********************
@@ -445,108 +437,6 @@ function App() {
   // https://www.java67.com/2022/01/how-to-create-dynamic-list-in-react.html
 
 
-
-
-  /** *********************************
-   *  BABYLON.JS
-   *  *********************************
-   */
-
-const onSceneReady = (scene) => {
-  // This creates and positions a free camera (non-mesh)
-  const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
-
-  // This targets the camera to scene origin
-  camera.setTarget(BABYLON.Vector3.Zero());
-
-  const canvas = scene.getEngine().getRenderingCanvas();
-
-  // This attaches the camera to the canvas
-  camera.attachControl(canvas, true);
-
-  const engine = scene.getEngine();
-  // const hdrTexture = new BABYLON.HDRCubeTexture("../hdr/lilienstein_8k.hdr", engine, 1024, false, true, false, true);
-  const hdrTexture = new BABYLON.HDRCubeTexture("../hdr/alps_field_8k.hdr", scene, 1024, false, true, true, false );
-  hdrTexture.level = .2
-
-  // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-  const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-
-  // Default intensity is 1. Let's dim the light a small amount
-  light.intensity = 0.7;
-
-  // inside the billiards room
-  const pointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-10, 20, -10), scene); // 0, 29, 0
-  pointLight.diffuse = new BABYLON.Color3(1, 1, 1);
-  pointLight.specular = new BABYLON.Color3(.5, .5, .5);
-  pointLight.intensity = 200;
-  pointLight.range = 5;
-
-  // add a box to the list
-  createBox()
-
-  // iterate through all boxes and 
-  for (let i=0; i<boxList.length; i++) {
-    boxList[i].updatable = true;
-    scene.addMesh(boxList[i]);
-  }
-
-  var glass = new BABYLON.PBRMaterial("glass", scene);
-  glass.indexOfRefraction = 0.52;
-  glass.alpha = 0.5;
-  glass.microSurface = 1;
-  glass.reflectivityColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-  glass.albedoTexture = new BABYLON.Texture("../obj/txt/window.png", scene, true, false);
-
-  let mesh;
-  const castle = BABYLON.SceneLoader.ImportMesh("", "../obj/", "castle5.glb", scene, function(meshes){
-      scene.getNodeById("window1").material = glass;
-      scene.getNodeById("window2").material = glass;
-      mesh = meshes[0];
-  });
-  //scene.addMesh(castle);
-
-  const floor = BABYLON.SceneLoader.ImportMesh("", "../obj/", "castle5-floor.glb", scene);
-  //scene.addMesh(floor);
-
-  const ground = BABYLON.SceneLoader.ImportMesh("", "../obj/", "castle5-ground.glb", scene);
-
-  // Our built-in 'ground' shape.
-  // MeshBuilder.CreateGround("ground", { width: 50, height: 50 }, scene);
-  scene.onPointerDown = function (evt, pickResult) {
-    if (pickResult.hit) {
-      console.log(pickResult.pickedMesh.id);
-      let selected = pickResult.pickedMesh;
-      /*
-      var myMaterial = new BABYLON.StandardMaterial("myMaterial", scene);
-      myMaterial.diffuseColor = new BABYLON.Color3(1, 0, 1);
-      myMaterial.specularColor = new BABYLON.Color3(0.5, 0.6, 0.87);
-      selected.material = myMaterial;
-      */
-      // var whereto = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, box.rotation.z);
-      pickResult.pickedPoint.x = 0;
-      pickResult.pickedPoint.y = 0;
-    }
-  }
-
-};
-
-/**
- * Will run on every frame render.  We are spinning the box on y-axis.
- */
-const onRender = (scene) => {
-  const deltaTimeInMillis = scene.getEngine().getDeltaTime();
-  const rpm = 15;
-
-  if (boxList !== undefined) {
-    for (let i=0; i<boxList.length; i++) {
-      let a = Math.random() * 2;
-      let b = 1 - a;
-      boxList[i].rotation.y += (rpm / 60) * Math.PI * 2 * b * (deltaTimeInMillis / 1000);
-    }
-    
-  }
-};
   
   return (  
     <div id='12345' className="App">
@@ -555,23 +445,10 @@ const onRender = (scene) => {
         <img src={logo} className="App-logo" alt="logo" width="80px" />
           <div style={{border: '1px solid blue'}}><b>{cs}</b></div>
 
-          <div>
-
-<SceneComponent
-  onSceneReady={onSceneReady} 
-  onRender={onRender} 
-  id="my-canvas" 
-  engineOptions={null}
-  sceneOptions={null}
-
-  antialias
-  adaptToDeviceRatio
-  />
-</div>
-
         <DraggableDiv 
           name='blah'
-          description='my description' />     
+          description='my description' />   
+          
         <br />
 
         Count: {count}<br />
