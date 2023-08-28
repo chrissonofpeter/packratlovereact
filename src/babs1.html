@@ -1,0 +1,227 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Babylon Template</title>
+
+    <style>
+        html, body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylon.glTFFileLoader.js"></script>
+
+</head>
+
+<body>
+
+    <canvas id="renderCanvas"></canvas>
+
+    <script>
+        /* **********************************
+         * to open the file
+         * http://localhost:8888/babs1.html
+         * **********************************
+         */
+
+        const canvas = document.getElementById("renderCanvas"); // Get the canvas element
+
+        const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+
+        const createScene = function () {
+
+            // Creates a basic Babylon Scene object
+
+            const scene = new BABYLON.Scene(engine);
+
+            scene.clearColor = new BABYLON.Color3(0.72, 0.82, 0.95);
+
+            /* Creates and positions a free camera */
+            const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(65, 26, 0), scene);
+
+            /* Targets the camera to scene origin */
+            camera.setTarget(new BABYLON.Vector3(0, 20, 100));
+
+            // This attaches the camera to the canvas
+            camera.attachControl(canvas, true);
+
+
+            // use this tool to create ENV files
+            // https://www.babylonjs.com/tools/ibl/
+            // scene.environmentTexture = new BABYLON.HDRCubeTexture("environment.env", scene, 1024, false, true, false, true);
+
+            
+            const hdrTexture = new BABYLON.HDRCubeTexture("./obj/castle2/hdr/lilienstein_8k.hdr", engine, 1024, false, true, false, true);
+            hdrTexture.level = .2
+            //var currentSkybox = scene.createDefaultSkybox(hdrTexture, false);
+            
+
+            /** *************************
+             *  L I G H T S
+             *  *************************
+             */
+    // const  light = new BABYLON.DirectionalLight("dir01", new BABYLON.Vector3(0, -1, 1), scene);
+    // light.position = new BABYLON.Vector3(0, 15, -30);
+
+            // inside the billiards room
+            const pointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-10, 20, -10), scene); // 0, 29, 0
+        	pointLight.diffuse = new BABYLON.Color3(1, 1, 1);
+	        pointLight.specular = new BABYLON.Color3(.5, .5, .5);
+            pointLight.intensity = 200;
+            pointLight.range = 5;
+
+            // inside of large hall
+            const pointLight2 = new BABYLON.PointLight("pointLight2", new BABYLON.Vector3(65, 26, 0), scene);
+        	pointLight2.diffuse = new BABYLON.Color3(1, 1, 1);
+	        pointLight2.specular = new BABYLON.Color3(.5, .5, .5);
+            pointLight2.intensity = 150;
+            pointLight2.range = 1;
+
+            // below the large hall
+            const pointLight3 = new BABYLON.PointLight("pointLight3", new BABYLON.Vector3(65, -15, -10), scene);
+        	pointLight3.diffuse = new BABYLON.Color3(1, 1, 1);
+	        pointLight3.specular = new BABYLON.Color3(.5, .5, .5);
+            pointLight3.intensity = 150;
+            pointLight3.range = 1;            
+
+            // Built-in 'sphere' shape
+            /*
+            const sphere = BABYLON.MeshBuilder.CreateSphere("sphere",
+                { diameter: 2, segments: 32 }, scene);
+            sphere.position.y = 1;
+            */
+
+
+            // Create materials
+            // https://doc.babylonjs.com/features/featuresDeepDive/materials/using/materials_introduction#texture
+            var glass = new BABYLON.PBRMaterial("glass", scene);
+            // glass.reflectionTexture = hdrTexture;
+        
+            glass.indexOfRefraction = 0.52;
+            glass.alpha = 0.5;
+            
+            /* DO NOT NEED
+            glass.directIntensity = 0.0;
+            glass.environmentIntensity = 0.7;
+            glass.cameraExposure = 0.66;
+            glass.cameraContrast = 1.66;
+            */
+            glass.microSurface = 1;
+            glass.reflectivityColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+            // glass.albedoColor = new BABYLON.Color3(0.95, 0.95, 0.95);
+
+            glass.albedoTexture = new BABYLON.Texture("./obj/castle2/textures/window.png", scene, true, false);
+
+            // Built-in 'ground' shape.
+            /* const ground = BABYLON.MeshBuilder.CreateGround("ground",{ width: 6, height: 6 }, scene); */
+
+            // const shadowGenerator = new BABYLON.ShadowGenerator(256, pointLight);
+
+            let mesh;
+            const castle = BABYLON.SceneLoader.ImportMesh("", "./obj/castle2/", "castle5.glb", scene, function(meshes){
+                scene.getNodeById("window1").material = glass;
+                scene.getNodeById("window2").material = glass;
+                mesh = meshes[0];
+
+                /** *************************
+                 *  S H A D O W S
+                 *  *************************
+                 */
+                // shadowGenerator.addShadowCaster(meshes[0], true);
+                /* shadowGenerator.useBlurExponentialShadowMap = true; */
+        
+            });
+
+            const vestibule = BABYLON.SceneLoader.ImportMesh("", "./obj/castle2/", "vestibule2.glb", scene, function(meshes){
+                // shadowGenerator.addShadowCaster(meshes[0], true);
+        
+            });
+
+            const floor = BABYLON.SceneLoader.ImportMesh("", "./obj/castle2/", "castle5-floor.glb", scene);
+            // floor.receiveShadows = true;
+
+            const ground = BABYLON.SceneLoader.ImportMesh("", "./obj/castle2/", "castle5-ground.glb", scene);
+            
+
+
+            /* rain sounds */
+            const sound = new BABYLON.Sound("rain", "./sounds/rain1.mp3", scene, function(){
+                sound.play(52);
+                }, { loop: true, autoplay: true});
+            sound.setVolume(0.1);
+
+            /* cricket sounds */
+            const crickets = new BABYLON.Sound("crickets", "./sounds/crickets.mp3", scene, function(){
+                crickets.play(52);
+                }, { loop: true, autoplay: true});
+            crickets.setVolume(0.55);
+
+            const creepy = new BABYLON.Sound("creepy", "https://assets.babylonjs.com/sound/Snow_Man_Scene/winterWoods.mp3", scene, function(){
+                creepy.play(52);
+                }, { loop: true, autoplay: true});
+            creepy.setVolume(0.4);
+
+            let test = scene.getMeshByName("room_main");
+            console.log(test);
+
+
+
+            
+            /*
+            // https://forum.babylonjs.com/t/how-to-correctly-import-gltf-and-add-physics/20234
+            let castleParent = castle.meshes[0];
+            castle = castleParent.getChildMeshes()[0];
+            castle.setParent(null);
+            castleParent.dispose();
+            */
+            console.log(scene);
+
+            scene.onPointerDown = function (evt, pickResult) {
+		        if (pickResult.hit) {
+                    console.log(pickResult);
+			        // var whereto = new BABYLON.Vector3(pickResult.pickedPoint.x, pickResult.pickedPoint.y, box.rotation.z);
+			        pickResult.pickedPoint.x = 0;
+			        pickResult.pickedPoint.y = 0;
+                    console.log(mesh);
+		        }
+	        }
+
+            return scene;
+        };
+
+        const scene = createScene(); //Call the function
+
+
+
+
+
+        // Register a render loop to repeatedly render the scene
+
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+
+        // Watch for browser/canvas resize events
+
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+
+    </script>
+
+</body>
+
+</html>
