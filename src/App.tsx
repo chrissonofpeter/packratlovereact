@@ -461,8 +461,6 @@ function App() {
           <button type="button" onClick={handleIncrease}>Increase</button>   
           &nbsp;
           <button type="button" onClick={createNote}>add note</button>
-          &nbsp;
-          <button type="button" onClick={createBox}>add box</button>
 
         <input type="text" value={value} onChange={(e) => setValue(e.target.value)} />{" "}
         <button onClick={addToList}> Click to Add </button>
